@@ -5,9 +5,16 @@ const port = 5000;
 const app = express();
 app.use(express.json());
 
-client.on('qr', (qr) => {
+
+
+app.get("/", async (req, res) => {
+    res.send("Server Whatsapp Running OK");
+})
+
+app.post("/kirimpesan", (req, res) => {
+    client.on('qr', (qr) => {
     console.log('Token Whatsapp ', qr);
-    qrcode.generate(qr, {small: true});
+    //qrcode.generate(qr, {small: true});
 });
 client.on('ready', () => {
     console.log('Client Siap !');
@@ -16,12 +23,6 @@ client.on('authenticated', () => {
     console.log('Terautentikasi');
 });
 client.initialize();
-
-app.get("/", async (req, res) => {
-    res.send("Server Whatsapp Running OK");
-})
-
-app.post("/kirimpesan", (req, res) => {
     const nomor = req.body.nomor;
     const pesan = req.body.pesan;
     client.sendMessage(nomor + "@c.us", pesan).then(response => {
