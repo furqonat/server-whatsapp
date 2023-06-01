@@ -1,28 +1,32 @@
-const {Client, LocalAuth} = require('whatsapp-web.js');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require("express");
 const port = 5000;
 
 const app = express();
 app.use(express.json());
 
+const client = new Client({puppeteer: {headless: true}, authStrategy: new LocalAuth()});
 
+client.initialize();
 
 app.get("/", async (req, res) => {
-    res.send("Server Whatsapp Running OK");
+    client.on('qr', (qr) => {
+        console.log('Token Whatsapp ', qr);
+        //qrcode.generate(qr, {small: true});
+        res.send({
+            message: qr
+        })
+    });
+    client.on('ready', () => {
+        console.log('Client Siap !');
+    });
+    client.on('authenticated', () => {
+        console.log('Terautentikasi');
+    });
+    // res.send("Server Whatsapp Running OK");
 })
 
 app.post("/kirimpesan", (req, res) => {
-    client.on('qr', (qr) => {
-    console.log('Token Whatsapp ', qr);
-    //qrcode.generate(qr, {small: true});
-});
-client.on('ready', () => {
-    console.log('Client Siap !');
-});
-client.on('authenticated', () => {
-    console.log('Terautentikasi');
-});
-client.initialize();
     const nomor = req.body.nomor;
     const pesan = req.body.pesan;
     client.sendMessage(nomor + "@c.us", pesan).then(response => {
@@ -38,7 +42,7 @@ client.initialize();
     })
 })
 
-app.listen(port,() => {
+app.listen(port, () => {
     console.log("Server Berjalana");
 })
 module.exports = app
